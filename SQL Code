@@ -1,0 +1,70 @@
+Project kali ini adalah mencari insight dari data transaksi toko DVD Rental, berdasarkan dataset yang dimiliki terdapat 15 tabel yaitu sebagai berikut :
+
+actor – data aktor beserta nama lengkapnya.
+film – title, release year, length, rating
+film_actor – stores the relationships between films and actors.
+category – stores film’s categories data.
+film_category- stores the relationships between films and categories.
+store – contains the store data including manager staff and address.
+inventory – stores inventory data.
+rental – stores rental data.
+payment – stores customer’s payments.
+staff – stores staff data.
+customer – stores customer data.
+address – stores address data for staff and customers
+city – stores city names.
+country – stores country names.
+
+Pertanyaan bisnis  serta jawaban yang diberikan untuk mendapatkan insight dari dataset yang diberikan menggunakan SQL adalah sebagai berikut :
+
+1.	Ada berapa banyak jumlah film yang memiliki tema “astronout” untuk dapat memberikan rekomendasi kepada pelanggan.
+
+select  title,  release_year, description
+from film
+where description like '%stronaut%'
+order by title;
+
+2.	Berapa banyak film yang memiliki rating “R” dan biaya rental antara $5 dan $15?
+
+select count(film_id) jumlah_film
+from film
+where rating = 'R' and replacement_cost between 5 and 15;
+
+3.	Toko akan memberikan bonus kepada staff, berdasarkan data hanya ada 2 staff ID yaitu ID 1 dan ID 2. Kita perlu mencari dari kedua staff tersebut mana yang memiliki transaksi terbanyak.
+
+select staff_id, (select concat(first_name, ' ', last_name)
+from staff s
+where p.staff_id = s.staff_id) as staff_name, count(payment_id ) as number_of_payment, sum(amount) as total_payment_amount
+from payment p group by staff_id order by number_of_payment desc;
+
+4.	Kantor pusat sedang melakukan audit stok, mereka ingin tahu rata-rata biaya sewa berdasarkan rating
+
+select rating, AVG(replacement_cost) as average_cost
+from film
+group by rating
+order by rating desc;
+
+5.	Perusahan hendak memberikan kupon diskon sebagai penghargaan atas customer yang loyal sebanyak 5 buah kupon, kita diminta untuk mencari tahu customer mana saja yang perlu diberikan kupon berdasarkan jumlah transaksi pembayaran terbanyak.
+
+select concat(first_name, ' ', last_name), email, (select sum(amount)
+from payment p where c.customer_id = p.customer_id) as spent_amount
+from customer c order by spent_amount desc limit 5;
+
+6. Kita diminta untuk cek inventory jumlah copy film setiap store
+
+select store_id, film_id, count(film_id ) as total_film
+from inventory
+group by film_id, store_id
+order by store_id;
+
+7. Perusahaan akan memberikan kartu kredit platinum kepada pelanggan dan diminta untuk mencari nama pelanggan, alamat email untuk dikirim penawaran dan jumlah transaksi minimal 40 transaksi.
+
+select	c.customer_id,	first_name,	last_name,	email,	count(c.customer_id) as total
+from	customer c
+inner join payment p ON p.customer_id = c.customer_id
+group by c.customer_id 
+having count(c.customer_id)>=40
+order by total desc;
+
+
+
